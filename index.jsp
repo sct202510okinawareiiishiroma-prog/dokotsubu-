@@ -1,5 +1,5 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" 
-    pageEncoding="UTF-8" %>
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html>
 <head>
@@ -7,11 +7,14 @@
 <title>どこつぶ</title>
 </head>
 <body>
-<h1>どこつぶへようこそ</h1>
-<form action="Login" method="post">
-ユーザー名：<input type="text" name="name"><br>
-パスワード：<input type="password" name="pass"><br>
-<input type="submit" value="ログイン">
-</form>
+	<h1>どこつぶへようこそ</h1>
+	<form action="Login" method="post">
+		ユーザー名：<input type="text" name="name"><br> パスワード：<input
+			type="password" name="pass"><br> <input type="submit"
+			value="ログイン">
+	</form>
+	<p>
+		<a href="UserRegister">新規ユーザー登録はこちら</a>
+	</p>
 </body>
 </html>
