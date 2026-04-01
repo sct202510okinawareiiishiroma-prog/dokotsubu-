@@ -1,17 +1,11 @@
 package model;
 
-import java.util.List;
+import dao.AccountDAO;
 
 public class RegisterUserLogic {
-    public boolean execute(User user, List<User> userList) {
-        // ユーザー名が既に使用されているかチェック [cite: 24]
-        for (User u : userList) {
-            if (u.getName().equals(user.getName())) {
-                return false; // 重複あり [cite: 24]
-            }
-        }
-        // 重複がなければリストに追加 [cite: 23]
-        userList.add(user);
-        return true;
+    public boolean execute(User user) {
+        AccountDAO dao = new AccountDAO();
+        // データベースにユーザーを保存し、成功(true)か失敗(false)を返す
+        return dao.create(user);
     }
 }

@@ -1,17 +1,12 @@
 package model;
 
-import java.util.List;
+import dao.AccountDAO;
 
 public class LoginLogic {
-	// 引数にユーザーリストを追加
-	public boolean execute(User user, List<User> userList) {
-		if (userList != null) {
-			for (User u : userList) {
-				if (u.getName().equals(user.getName()) && u.getPass().equals(user.getPass())) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
+    public boolean execute(User user) {
+        AccountDAO dao = new AccountDAO();
+        User result = dao.findByLogin(user);
+        // ユーザーが見つかれば(nullでなければ)ログイン成功
+        return result != null;
+    }
 }
