@@ -12,9 +12,9 @@ dokotsubu
 │   ├── model
 │   │   ├── DatabaseConfig.java      (DB接続設定)
 │   │   ├── User.java               (ユーザー情報)
-│   │   ├── Mutter.java             (つぶやき情報：ID対応済)
-│   │   ├── LoginLogic.java         (ログインロジック：User返却版)
-│   │   ├── PostMutterLogic.java    (投稿ロジック：boolean返却版)
+│   │   ├── Mutter.java             (つぶやき情報)
+│   │   ├── LoginLogic.java         (ログインロジック)
+│   │   ├── PostMutterLogic.java    (投稿ロジック)
 │   │   ├── GetMutterListLogic.java (取得ロジック)
 │   │   └── RegisterUserLogic.java  (登録ロジック)
 │   └── servlet
@@ -26,14 +26,13 @@ dokotsubu
     ├── index.jsp                  (トップ画面)
     └── WEB-INF
         └── jsp
-            ├── main.jsp            (つぶやき画面：赤字エラー対応済)
+            ├── main.jsp            (つぶやき画面)
             ├── loginResult.jsp     (ログイン結果)
             ├── logout.jsp          (ログアウト完了)
             ├── userRegister.jsp    (登録入力)
             ├── userRegisterConfirm.jsp (登録確認)
             ├── userRegisterDone.jsp (登録完了)
             └── userRegisterError.jsp (登録エラー)
-
 ###技術スタック
 Java 21
 Jakarta EE (Tomcat 10+)
