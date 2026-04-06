@@ -35,10 +35,10 @@ public class Login extends HttpServlet {
 		// 3. ログイン処理の実行
 		User user = new User(name, pass);
 		LoginLogic loginLogic = new LoginLogic();
-		boolean isLogin = loginLogic.execute(user);
+		User loginUser = loginLogic.execute(user);
 
 		// 4. 判定結果に応じた処理
-		if (isLogin) {
+		if (loginUser != null) {
 			// 【成功時】ユーザー情報をセッションに保存
 			HttpSession session = request.getSession();
 			session.setAttribute("loginUser", user);

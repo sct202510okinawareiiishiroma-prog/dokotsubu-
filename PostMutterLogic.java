@@ -1,9 +1,10 @@
 package model;
 
-import java.util.List;
+import dao.MutterDAO;
 
 public class PostMutterLogic {
-	public void execute(Mutter mutter,List<Mutter> mutterList) {
-		mutterList.add(0,mutter); //先頭に追加
-	}
+    public boolean execute(Mutter mutter) { // 戻り値をbooleanに変更
+        MutterDAO dao = new MutterDAO();
+        return dao.create(mutter); // 保存の成否を返す
+    }
 }

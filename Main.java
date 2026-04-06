@@ -1,88 +1,94 @@
 package servlet;
 
-//java標準（データの入れ物やエラー処理）
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
-//jakarta EE (サーブレットやセッションなどのweb機能)
 import jakarta.servlet.RequestDispatcher;
-import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-//自作クラス（自分が作ったビジネスロジック）
+import model.GetMutterListLogic;
 import model.Mutter;
 import model.PostMutterLogic;
 import model.User;
 
 @WebServlet("/Main")
 public class Main extends HttpServlet {
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	protected void doGet(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException,IOException {
+    /**
+     * つぶやき画面の表示処理
+     */
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
 
-		//  つぶやきリストをアプリケーションスコープから取得
-		ServletContext application = this.getServletContext();
-		List<Mutter> mutterList = (List<Mutter>) application.getAttribute("mutterList");
+        // 1. 最新のつぶやきリストをDBから取得してリクエストスコープにセット
+        GetMutterListLogic getMutterListLogic = new GetMutterListLogic();
+        List<Mutter> mutterList = getMutterListLogic.execute();
+        request.setAttribute("mutterList", mutterList);
 
-		//取得できなかった場合は、つぶやきリストを新規作成して
-		//アプリケーションスコープに保存
-		if (mutterList == null) {
-			mutterList = new ArrayList<>();
-			application.setAttribute("mutterList", mutterList);
-		}
+        // 2. ログインチェック
+        HttpSession session = request.getSession();
+        User loginUser = (User) session.getAttribute("loginUser");
 
-		//ログインしているか確認するため
-		//セッションスコープからユーザー情報を取得
-		HttpSession session = request.getSession();
-		User loginUser = (User) session.getAttribute("loginUser");
+        if (loginUser == null) {
+            // 未ログインならトップ画面へ
+            response.sendRedirect("index.jsp");
+        } else {
+            // ログイン済みならメイン画面へフォワード
+            RequestDispatcher dispatcher = request.getRequestDispatcher("WEB-INF/jsp/main.jsp");
+            dispatcher.forward(request, response);
+        }
+    }
 
-		if (loginUser == null) {//ログインしていない場合
-			//リダイレクト
-			response.sendRedirect("index.jsp");
-		} else {//ログイン済みの場合
+    /**
+     * つぶやきの投稿処理
+     */
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) 
+            throws ServletException, IOException {
+        
+        // 1. リクエストパラメータの取得
+        request.setCharacterEncoding("UTF-8");
+        String text = request.getParameter("text");
 
-			//フォワード
-			RequestDispatcher dispatcher = request.getRequestDispatcher("WEB-INF/jsp/main.jsp");
-			dispatcher.forward(request, response);
-		}
-	}
+        // 2. 入力値のバリデーション（空チェック ＆ 255文字制限）
+        if (text != null && text.length() != 0 && text.length() <= 255) {
+            
+            // セッションスコープからログインユーザー情報を取得
+            HttpSession session = request.getSession();
+            User loginUser = (User) session.getAttribute("loginUser");
 
-	@Override
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		//リクエストパラメーターの取得
-		request.setCharacterEncoding("UTF-8");
-		String text = request.getParameter("text");
-		
-		//入力値チェック
-		if (text != null && text.length() != 0) {
-			//アプリケーションスコープに保存されたつぶやきリストを取得
-			ServletContext application =this.getServletContext();
-			List<Mutter> mutterList = (List<Mutter>) application.getAttribute("mutterList");
-			
-			//セッションスコープに保存されたユーザー情報を取得
-			HttpSession session = request.getSession();
-			User loginUser = (User) session.getAttribute("loginUser");
-			
-			//つぶやきを作成してつぶやきリストに追加
-			Mutter mutter = new Mutter(loginUser.getName(),text);
-			PostMutterLogic postMutterLogic = new PostMutterLogic();
-			postMutterLogic.execute(mutter, mutterList);
-			
-			//アプリケーションスコープにつぶやきリストを保存
-			application.setAttribute("mutterList",mutterList);
-		}else{
-			//エラーメッセージをリクエストスコープに保存
-			request.setAttribute("errorMsg","つぶやきが入力されていません");
-		}
-		
-		//メイン画面にフォワード
-		RequestDispatcher dispatcher = request.getRequestDispatcher("WEB-INF/jsp/main.jsp");
-		dispatcher.forward(request,response);	
-		}
+            // つぶやきをDBに保存
+            Mutter mutter = new Mutter(loginUser.getName(), text);
+            PostMutterLogic postMutterLogic = new PostMutterLogic();
+            postMutterLogic.execute(mutter);
+
+            // 投稿成功後は、二重投稿防止のためリダイレクトで表示処理(doGet)を呼び出す
+            response.sendRedirect("Main");
+            
+        } else {
+            // 3. バリデーションエラー時の処理
+            if (text == null || text.length() == 0) {
+                request.setAttribute("errorMsg", "つぶやきが入力されていません");
+            } else {
+                // 255文字を超えた場合
+                request.setAttribute("errorMsg", "つぶやきは255文字以内で入力してください（現在: " + text.length() + "文字）");
+            }
+            
+            // エラー表示のため、現在のリストを再取得してリクエストスコープにセット
+            GetMutterListLogic getMutterListLogic = new GetMutterListLogic();
+            List<Mutter> mutterList = getMutterListLogic.execute();
+            request.setAttribute("mutterList", mutterList);
+            
+            // 入力中だったテキストを保持したい場合はここに追加（今回は省略）
+            
+            // メイン画面へフォワード（エラーメッセージを含めて表示）
+            RequestDispatcher dispatcher = request.getRequestDispatcher("WEB-INF/jsp/main.jsp");
+            dispatcher.forward(request, response);
+        }
+    }
 }

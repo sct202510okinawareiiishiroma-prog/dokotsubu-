@@ -4,8 +4,8 @@
 <%
 //セッションスコープに保存されたユーザー情報を取得
 User loginUser = (User)session.getAttribute("loginUser");
-//アプリケーションスコープに保存されたつぶやきリストを取得
-List<Mutter> mutterList = (List<Mutter>)application.getAttribute("mutterList");
+//リクエストスコープ（request）から取得するように変更
+List<Mutter> mutterList = (List<Mutter>)request.getAttribute("mutterList");
 //リクエストスコープに保存されたつぶやきリストを取得
 String errorMsg = (String)request.getAttribute("errorMsg");
 %>
@@ -27,7 +27,7 @@ String errorMsg = (String)request.getAttribute("errorMsg");
 <input type="submit"value="つぶやく">
 </form>
 <% if (errorMsg != null) { %>
-<p><%= errorMsg %></p>
+<p style="color: red;"><%= errorMsg %></p>
 <% } %>
 <% for(Mutter mutter:mutterList){%>
  <p><%= mutter.getUserName() %>:<%= mutter.getText() %></p>
